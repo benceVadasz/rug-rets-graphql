@@ -33,3 +33,13 @@ export const DesignType = new GraphQLObjectType({
         user: {type: GraphQLString}
     })
 })
+
+export const PostType = new GraphQLObjectType({
+    name: "Post",
+    fields: () => ({
+        message: {type: GraphQLString},
+        selectedFile: {type: GraphQLString},
+        user: {type: GraphQLString},
+    })
+})
+

@@ -5,6 +5,8 @@ import {CHECK_IF_COLOR_EXISTS, GET_COLORS} from "./Queries/Color";
 import {UPLOAD_COLOR} from "./Mutations/Color";
 import {GET_DESIGNS} from "./Queries/Design";
 import {UPLOAD_DESIGN} from "./Mutations/Design";
+import {UPLOAD_POST} from "./Mutations/Post";
+import {GET_POSTS} from "./Queries/Post";
 
 const RootQuery = new GraphQLObjectType({
     name: "RootQuery",
@@ -12,7 +14,8 @@ const RootQuery = new GraphQLObjectType({
         getAllUsers: GET_ALL_USERS,
         getColors: GET_COLORS,
         colorExists: CHECK_IF_COLOR_EXISTS,
-        getDesigns: GET_DESIGNS
+        getDesigns: GET_DESIGNS,
+        getPosts: GET_POSTS
     },
 });
 
@@ -22,7 +25,8 @@ const Mutation = new GraphQLObjectType({
         signUp: SIGN_UP,
         signIn: SIGN_IN,
         uploadColor: UPLOAD_COLOR,
-        uploadDesign: UPLOAD_DESIGN
+        uploadDesign: UPLOAD_DESIGN,
+        uploadPost: UPLOAD_POST
     },
 });
 
