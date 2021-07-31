@@ -1,5 +1,5 @@
 import { GraphQLString } from "graphql";
-import {UserType} from "../TypeDefs/User";
+import {UserType} from "../typeDefs";
 import User from "../../Models/User";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
