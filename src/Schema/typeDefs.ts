@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLID, GraphQLString } from "graphql";
+import {GraphQLObjectType, GraphQLID, GraphQLString, GraphQLList} from "graphql";
 
 export const UserType = new GraphQLObjectType({
     name: "User",
@@ -20,6 +20,16 @@ export const ColorType = new GraphQLObjectType({
     fields: () => ({
         name: {type: GraphQLString},
         value: {type: GraphQLString},
+        user: {type: GraphQLString}
+    })
+})
+
+export const DesignType = new GraphQLObjectType({
+    name: "Design",
+    fields: () => ({
+        name: {type: GraphQLString},
+        colors: {type: GraphQLList(GraphQLString)},
+        shape: {type: GraphQLString},
         user: {type: GraphQLString}
     })
 })
