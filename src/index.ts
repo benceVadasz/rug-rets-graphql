@@ -1,9 +1,15 @@
-import {ApolloServer, gql} from "apollo-server-express";
+import {ApolloServer} from "apollo-server-express";
 import express from 'express';
 import mongoose from 'mongoose'
 import cors from "cors";
-import {schema} from "./Schema";
+import {Mutation} from './resolvers/Mutation'
+import {Query} from './resolvers/Query'
+import {typeDefs} from "./typeDefs";
 
+const resolvers = {
+    Mutation,
+    Query
+}
 
 const startServer = async () => {
     const app = express();
@@ -13,7 +19,8 @@ const startServer = async () => {
 
 
     const server = new ApolloServer({
-        schema
+        typeDefs,
+        resolvers
     });
 
     server.applyMiddleware({app});
