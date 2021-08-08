@@ -4,7 +4,7 @@ export const typeDefs = gql`
     type User {
         id: ID
         _id: ID
-        username: String
+        username: String!
         givenName: String!
         familyName: String!
         email: String!
@@ -16,6 +16,11 @@ export const typeDefs = gql`
         value: String!
         user: String!
     }
+    
+    type ColorPayload {
+        color: Color!
+        user: User!
+    }
 
     type Design {
         name: String!
@@ -23,13 +28,22 @@ export const typeDefs = gql`
         shape: String!
         user: String!
     }
+    
+    type DesignPayload {
+        design: Design!
+        user: User!
+    }
 
     type Post {
         message: String!
         selectedFile: String!
-        user: String!
     }
 
+    type PostPayload {
+        post: Post!
+        user: User!
+    }
+    
     type AuthPayload {
         token: String
         user: User
@@ -47,8 +61,8 @@ export const typeDefs = gql`
         signUp(username: String!, givenName: String!, familyName: String!,
             email: String!, password: String!, confirmPassword: String!): AuthPayload
         signIn(email: String!, password: String!): AuthPayload
-        uploadColor(name: String, hex: String!, userId: ID!): Color
-        uploadDesign(userId: ID!, name: String!, colors: [String!]!): Design,
-        uploadPost(userId: ID!, message: String!, selectedFile: String!): Post
+        uploadColor(name: String, value: String!): ColorPayload
+        uploadDesign(name: String!, colors: [String!]!): DesignPayload,
+        uploadPost(message: String!, selectedFile: String): PostPayload
     }
 `

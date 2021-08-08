@@ -5,6 +5,7 @@ import cors from "cors";
 import {Mutation} from './resolvers/Mutation'
 import {Query} from './resolvers/Query'
 import {typeDefs} from "./typeDefs";
+import {getUserId} from "./utils";
 
 const resolvers = {
     Mutation,
@@ -20,7 +21,14 @@ const startServer = async () => {
 
     const server = new ApolloServer({
         typeDefs,
-        resolvers
+        resolvers,
+        context: async ({req}) => {
+            return {
+                ...req,
+                userId:
+                    req && req.headers.authorization ? getUserId(req) : null
+            };
+        }
     });
 
     server.applyMiddleware({app});
