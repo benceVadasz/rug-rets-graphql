@@ -6,6 +6,7 @@ import Color from "../Models/Color";
 import Design from "../Models/Design";
 import Post from "../Models/Post";
 import {ACCESS_TOKEN_SECRET} from "../constants";
+import mongoose from 'mongoose';
 
 const defaultNewUser = {
     username: "",
@@ -34,7 +35,7 @@ const defaultDesignData = {
 }
 
 const defaultPostData = {
-    userId: "",
+    id: "",
     message: "",
     selectedFile: ""
 }
@@ -115,7 +116,8 @@ export const Mutation = {
             await newColor.save();
             return {
                 color: newColor,
-                user };
+                user
+            };
         } catch (error) {
             throw new Error(error.message)
         }
@@ -133,18 +135,18 @@ export const Mutation = {
             await newDesign.save();
             return {
                 design: newDesign,
-                user };
+                user
+            };
         } catch (error) {
             throw new Error(error.message)
         }
     },
-
     uploadPost: async (_: any, args = defaultPostData, context: any) => {
         const {userId} = context
         if (!userId) {
             throw new Error('Not Authenticated')
         }
-        const user = await User.findOne({"_id" : userId});
+        const user = await User.findOne({"_id": userId});
 
         const {message, selectedFile} = args
         const newPost = new Post({message, selectedFile, user: userId, createdAt: new Date().toISOString()})
@@ -152,10 +154,38 @@ export const Mutation = {
             await newPost.save();
             return {
                 post: newPost,
-                user };
+                user
+            };
         } catch (error) {
             throw new Error(error.message)
         }
+    },
+    updatePost: async (_: any, args = defaultPostData, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const user = await User.findOne({"_id": userId});
+        const {id, message, selectedFile} = args
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new Error(`No post with id: ${id}`);
+        }
+        const updatedPost = {_id: id, message, selectedFile, user: userId};
+        const post = await Post.findByIdAndUpdate(id, updatedPost, {new: true});
+
+        return {post, user}
+    },
+    deletePost: async (_: any, args = {id: ""}, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const {id} = args
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new Error(`No post with id: ${id}`);
+        }
+        await Post.findByIdAndDelete(id)
+        return true
     }
 }
 

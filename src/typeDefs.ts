@@ -64,5 +64,7 @@ export const typeDefs = gql`
         uploadColor(name: String, value: String!): ColorPayload
         uploadDesign(name: String!, colors: [String!]!): DesignPayload,
         uploadPost(message: String!, selectedFile: String): PostPayload
+        updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
+        deletePost(id: ID!): Boolean
     }
 `
