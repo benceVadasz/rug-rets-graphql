@@ -23,7 +23,6 @@ export const Query = {
             })
         })
     },
-
     getColors: async (_: any, args = defaultColor) => {
         try {
             const {userId} = args
@@ -37,7 +36,6 @@ export const Query = {
         const matches = await Color.find({value});
         return matches.length > 0
     },
-
     getDesigns: async (_: any, args = {userId: ""}) => {
         try {
             const {userId} = args
