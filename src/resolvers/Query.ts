@@ -77,12 +77,28 @@ export const Query = {
             throw new Error('Not Authenticated')
         }
         const user = await User.findOne({"_id": id});
-        const posts = await Post.find({ user: id });
+        const posts = await Post.find({user: id});
 
         return {
             posts,
             user
         }
 
+    },
+    getPostsBySearch: async (_: any, args = {searchQuery: ""}, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const {searchQuery} = args
+        const message = new RegExp(searchQuery, "i");
+
+        const posts = await Post.find({$or: [{message}]});
+        const user = await User.findOne({"_id": userId});
+
+        return {
+            posts,
+            user
+        }
     }
 }
