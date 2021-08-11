@@ -1,12 +1,13 @@
-import User from "../Models/User";
+import User from "../models/User";
 import {UserInputError} from "apollo-server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import Color from "../Models/Color";
-import Design from "../Models/Design";
-import Post from "../Models/Post";
+import Color from "../models/Color";
+import Design from "../models/Design";
+import Post from "../models/Post";
 import {ACCESS_TOKEN_SECRET} from "../constants";
 import mongoose from 'mongoose';
+import {throws} from "assert";
 
 const defaultNewUser = {
     username: "",
@@ -186,6 +187,34 @@ export const Mutation = {
         }
         await Post.findByIdAndDelete(id)
         return true
+    },
+    likePost: async (_: any, args = {id: ""}, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const user = await User.findOne({"_id": userId});
+        const { id } = args;
+
+        if (!mongoose.Types.ObjectId.isValid(id)){
+            throw new Error(`No post with id: ${id}`);
+        }
+
+        const post = await Post.findById(id);
+        const index = post.likes.findIndex((id: string) => id ===String(userId));
+
+        if (index === -1) {
+            post.likes.push(userId);
+        } else {
+            post.likes = post.likes.filter((id: string) => id !== String(userId));
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+
+        return {
+            post: updatedPost,
+            user
+        };
     }
 }
 
