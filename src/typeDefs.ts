@@ -36,11 +36,17 @@ export const typeDefs = gql`
 
     type Post {
         message: String!
-        selectedFile: String!
+        selectedFile: String
+        likes: [String]
     }
 
     type PostPayload {
         post: Post!
+        user: User!
+    }
+    
+    type PostsPayload {
+        posts: [Post!]!
         user: User!
     }
     
@@ -55,6 +61,8 @@ export const typeDefs = gql`
         colorExists(hex: String!): Boolean
         getDesigns(userId: ID!): [Design!]!
         getPosts: [Post!]!
+        getPost(id: ID!): PostPayload
+        getPostsByCreator(id: ID!): PostsPayload
     }
 
     type Mutation {
@@ -66,5 +74,6 @@ export const typeDefs = gql`
         uploadPost(message: String!, selectedFile: String): PostPayload
         updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
         deletePost(id: ID!): Boolean
+        likePost(id: ID!): PostPayload
     }
 `

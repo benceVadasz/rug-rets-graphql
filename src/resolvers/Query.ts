@@ -1,7 +1,8 @@
-import User from "../Models/User";
-import Color from "../Models/Color";
-import Design from "../Models/Design";
-import Post from "../Models/Post";
+import User from "../models/User";
+import Color from "../models/Color";
+import Design from "../models/Design";
+import Post from "../models/Post";
+import mongoose from "mongoose";
 
 const defaultColor = {
     userId: ""
@@ -50,5 +51,38 @@ export const Query = {
         } catch (e) {
             throw new Error(e.message)
         }
+    },
+    getPost: async (_: any, args = {id: ""}, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const {id} = args
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new Error(`No post with id: ${id}`);
+        }
+        const user = await User.findOne({"_id": userId});
+        const post = await Post.findById(id);
+
+        return {
+            post, user
+        }
+    },
+    getPostsByCreator: async (_: any, args = {id: ""}, context: any) => {
+
+        const {id} = args
+
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        const user = await User.findOne({"_id": id});
+        const posts = await Post.find({ user: id });
+
+        return {
+            posts,
+            user
+        }
+
     }
 }
