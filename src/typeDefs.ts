@@ -63,7 +63,7 @@ export const typeDefs = gql`
         getPosts: [Post!]!
         getPost(id: ID!): PostPayload
         getPostsByCreator(id: ID!): PostsPayload
-        getPostsBySearch(searchQuery: String!): PostsPayload
+        getPostsBySearch(searchQuery: String!): [Post!]!
     }
 
     type Mutation {

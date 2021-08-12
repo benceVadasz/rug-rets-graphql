@@ -75,14 +75,10 @@ export const Query = {
             post, user
         }
     },
-    getPostsByCreator: async (_: any, args = {id: ""}, context: any) => {
+    getPostsByCreator: async (_: any, args = {id: ""}) => {
 
         const {id} = args
 
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
         const user = await User.findOne({"_id": id});
         const posts = await Post.find({user: id});
 
@@ -93,19 +89,10 @@ export const Query = {
 
     },
     getPostsBySearch: async (_: any, args = {searchQuery: ""}, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+
         const {searchQuery} = args
         const message = new RegExp(searchQuery, "i");
 
-        const posts = await Post.find({$or: [{message}]});
-        const user = await User.findOne({"_id": userId});
-
-        return {
-            posts,
-            user
-        }
+        return Post.find({$or: [{message}]});
     }
 }
