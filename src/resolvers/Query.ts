@@ -13,6 +13,13 @@ const defaultColorValue = {
 }
 
 export const Query = {
+    me: async (_: any, args: null, context: any) => {
+        const {userId} = context
+        if (!userId) {
+            throw new Error('Not Authenticated')
+        }
+        return User.findById(userId)
+    },
     getAllUsers: () => {
         return new Promise((resolve, reject) => {
             User.find({}, (err, result) => {

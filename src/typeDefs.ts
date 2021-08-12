@@ -8,7 +8,6 @@ export const typeDefs = gql`
         givenName: String!
         familyName: String!
         email: String!
-        token: String!
     }
 
     type Color {
@@ -56,6 +55,7 @@ export const typeDefs = gql`
     }
 
     type Query {
+        me: User!
         getAllUsers: [User!]!
         getColors(userId: ID!): [Color!]!
         colorExists(hex: String!): Boolean
