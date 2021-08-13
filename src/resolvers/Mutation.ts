@@ -7,7 +7,7 @@ import Design from "../models/Design";
 import Post from "../models/Post";
 import {ACCESS_TOKEN_SECRET} from "../constants";
 import mongoose from 'mongoose';
-import {throws} from "assert";
+import {isAuth} from "../utils";
 
 const defaultNewUser = {
     username: "",
@@ -39,6 +39,11 @@ const defaultPostData = {
     id: "",
     message: "",
     selectedFile: ""
+}
+
+const defaultCommentData = {
+    postId: "",
+    comment: ""
 }
 
 export const Mutation = {
@@ -103,14 +108,9 @@ export const Mutation = {
             token
         }
     },
-
     uploadColor: async (_: any, args = colorData, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not authenticated')
-        }
-        const user = await User.findOne({userId});
-
+        const userId = isAuth(context)
+        const user = await User.findOne({"_id": userId});
         const {name, value} = args
         const newColor = new Color({name, value, user: userId, createdAt: new Date().toISOString()})
         try {
@@ -123,13 +123,12 @@ export const Mutation = {
             throw new Error(error.message)
         }
     },
-
+    deleteColor: async (_:any, args= {value: ""}, context: any) => {
+        const userId = isAuth(context)
+    },
     uploadDesign: async (_: any, args = defaultDesignData, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not authenticated')
-        }
-        const user = await User.findOne({userId});
+        const userId = isAuth(context)
+        const user = await User.findOne({"_id": userId});
         const {name, colors} = args
         const newDesign = new Design({name, colors, user: userId, createdAt: new Date().toISOString()})
         try {
@@ -142,11 +141,9 @@ export const Mutation = {
             throw new Error(error.message)
         }
     },
+
     uploadPost: async (_: any, args = defaultPostData, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
 
         const {message, selectedFile} = args
@@ -162,10 +159,7 @@ export const Mutation = {
         }
     },
     updatePost: async (_: any, args = defaultPostData, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
         const {id, message, selectedFile} = args
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -177,10 +171,7 @@ export const Mutation = {
         return {post, user}
     },
     deletePost: async (_: any, args = {id: ""}, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        isAuth(context)
         const {id} = args
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
@@ -189,10 +180,7 @@ export const Mutation = {
         return true
     },
     likePost: async (_: any, args = {id: ""}, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
         const { id } = args;
 

@@ -25,6 +25,16 @@ function getUserId(req, authToken) {
     throw new Error('Not authenticated');
 }
 
+function isAuth(context) {
+    const {userId} = context
+    if (!userId) {
+        throw new Error('Not authenticated')
+    } else {
+        return userId
+    }
+}
+
 module.exports = {
-    getUserId
+    getUserId,
+    isAuth
 }
