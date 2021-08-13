@@ -203,6 +203,18 @@ export const Mutation = {
             post: updatedPost,
             user
         };
+    },
+    commentPost: async (_: any, args= defaultCommentData, context: any) => {
+        const userId = isAuth(context)
+        const user = await User.findOne({"_id": userId})
+
+        const {postId, comment} = args
+        const post = await Post.findById(postId)
+
+        post.comments.push({"username" : user.username, "text": comment});
+
+        const updatePost = await Post.findByIdAndUpdate(postId, post, { new: true });
+        return updatePost
     }
 }
 

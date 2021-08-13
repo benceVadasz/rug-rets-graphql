@@ -32,11 +32,17 @@ export const typeDefs = gql`
         design: Design!
         user: User!
     }
+    
+    type Comment {
+        username: String!
+        text: String!
+    }
 
     type Post {
         message: String!
         selectedFile: String
-        likes: [String]
+        likes: [String!]!
+        comments: [Comment!]!
     }
 
     type PostPayload {
@@ -50,8 +56,8 @@ export const typeDefs = gql`
     }
     
     type AuthPayload {
-        token: String
-        user: User
+        token: String!
+        user: User!
     }
 
     type Query {
@@ -71,10 +77,12 @@ export const typeDefs = gql`
             email: String!, password: String!, confirmPassword: String!): AuthPayload
         signIn(email: String!, password: String!): AuthPayload
         uploadColor(name: String, value: String!): ColorPayload
+        deleteColor(id: ID!): Boolean
         uploadDesign(name: String!, colors: [String!]!): DesignPayload,
         uploadPost(message: String!, selectedFile: String): PostPayload
         updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
         deletePost(id: ID!): Boolean
         likePost(id: ID!): PostPayload
+        commentPost(postId: ID!, comment: String!): Post
     }
 `
