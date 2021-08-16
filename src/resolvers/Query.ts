@@ -3,10 +3,7 @@ import Color from "../models/Color";
 import Design from "../models/Design";
 import Post from "../models/Post";
 import mongoose from "mongoose";
-
-const defaultColor = {
-    userId: ""
-}
+import {isAuth} from "../utils";
 
 const defaultColorValue = {
     value: ""
@@ -14,10 +11,7 @@ const defaultColorValue = {
 
 export const Query = {
     me: async (_: any, args: null, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        const userId = isAuth(context)
         return User.findById(userId)
     },
     getAllUsers: () => {
@@ -31,26 +25,18 @@ export const Query = {
             })
         })
     },
-    getColors: async (_: any, args = defaultColor) => {
-        try {
-            const {userId} = args
-            return await Color.find({user: userId});
-        } catch (e) {
-            throw new Error(e.message)
-        }
+    getColors: async (_: any, args: null, context: any) => {
+        const userId = isAuth(context)
+        return Color.find({user: userId});
     },
     colorExists: async (_: any, args = defaultColorValue) => {
         const {value} = args
         const matches = await Color.find({value});
         return matches.length > 0
     },
-    getDesigns: async (_: any, args = {userId: ""}) => {
-        try {
-            const {userId} = args
-            return await Design.find({user: userId});
-        } catch (e) {
-            throw new Error(e.message)
-        }
+    getDesigns: async (_: any, args: null, context: any) => {
+        const userId = isAuth(context)
+        return Design.find({user: userId});
     },
     getPosts: async () => {
         try {
@@ -60,10 +46,7 @@ export const Query = {
         }
     },
     getPost: async (_: any, args = {id: ""}, context: any) => {
-        const {userId} = context
-        if (!userId) {
-            throw new Error('Not Authenticated')
-        }
+        const userId = isAuth(context)
         const {id} = args
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);

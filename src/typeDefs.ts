@@ -2,13 +2,23 @@ import {gql} from "apollo-server-express";
 
 export const typeDefs = gql`
     type User {
-        id: ID
         _id: ID
         username: String!
         givenName: String!
         familyName: String!
         email: String!
+        street: String
+        zipcode: Int
+        city: String
+        other: String
     }
+
+#    fragment addressDetails on User {
+#        street
+#        zipcode
+#        city
+#        other
+#    }
 
     type Color {
         name: String!
@@ -63,9 +73,9 @@ export const typeDefs = gql`
     type Query {
         me: User!
         getAllUsers: [User!]!
-        getColors(userId: ID!): [Color!]!
+        getColors: [Color!]!
         colorExists(hex: String!): Boolean
-        getDesigns(userId: ID!): [Design!]!
+        getDesigns: [Design!]!
         getPosts: [Post!]!
         getPost(id: ID!): PostPayload
         getPostsByCreator(id: ID!): PostsPayload
@@ -83,6 +93,6 @@ export const typeDefs = gql`
         updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
         deletePost(id: ID!): Boolean
         likePost(id: ID!): PostPayload
-        commentPost(postId: ID!, comment: String!): Post
+        commentPost(id: ID!, comment: String!): Post
     }
 `
