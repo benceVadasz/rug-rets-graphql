@@ -42,7 +42,7 @@ const defaultPostData = {
 }
 
 const defaultCommentData = {
-    postId: "",
+    id: "",
     comment: ""
 }
 
@@ -50,30 +50,24 @@ export const Mutation = {
     signUp: async (_: any, args = defaultNewUser) => {
         const {username, givenName, familyName, email, password, confirmPassword} = args
 
-        const existingUser = await User.findOne({email});
-        if (existingUser) {
-            throw new UserInputError('Email is taken', {
-                errors: {
-                    username: 'This email is taken'
-                }
-            });
+        const emailRegistered = await User.findOne({email});
+        const takenUsername = await User.findOne({username});
+
+        if (emailRegistered || takenUsername) {
+            throw new UserInputError(emailRegistered ? 'Email is already registered' : 'Username is taken');
         }
         if (password !== confirmPassword) {
-            throw new UserInputError('Passwords do not match', {
-                errors: {
-                    password: 'Passwords do not match'
-                }
-            });
+            throw new UserInputError('Passwords do not match');
         }
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        const result = await User.create({username, givenName, familyName, password: hashedPassword, email});
+        const user = await User.create({username, givenName, familyName, password: hashedPassword, email});
 
-        const token = jwt.sign({email: result.email, id: result._id},
+        const token = jwt.sign({email: user.email, id: user._id},
             ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
 
         return {
-            user: result,
+            user,
             token
         };
     },
@@ -94,8 +88,8 @@ export const Mutation = {
         if (!isPasswordCorrect) {
             throw new UserInputError('Invalid credentials', {
                 errors: {
-                    email: email,
-                    password: password
+                    email,
+                    password
                 }
             });
         }
@@ -112,63 +106,61 @@ export const Mutation = {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
         const {name, value} = args
-        const newColor = new Color({name, value, user: userId, createdAt: new Date().toISOString()})
-        try {
-            await newColor.save();
-            return {
-                color: newColor,
-                user
-            };
-        } catch (error) {
-            throw new Error(error.message)
-        }
+
+        const color = new Color({name, value, user: userId, createdAt: new Date().toISOString()})
+        await color.save();
+
+        return {
+            color,
+            user
+        };
     },
-    deleteColor: async (_:any, args= {value: ""}, context: any) => {
-        const userId = isAuth(context)
+    deleteColor: async (_: any, args = {id: ""}, context: any) => {
+        const {id} = args
+        isAuth(context)
+        await Color.findByIdAndDelete(id)
+        return true
     },
     uploadDesign: async (_: any, args = defaultDesignData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
         const {name, colors} = args
-        const newDesign = new Design({name, colors, user: userId, createdAt: new Date().toISOString()})
-        try {
-            await newDesign.save();
-            return {
-                design: newDesign,
-                user
-            };
-        } catch (error) {
-            throw new Error(error.message)
-        }
-    },
 
+        const design = new Design({name, colors, user: userId, createdAt: new Date().toISOString()})
+        await design.save();
+
+        return {
+            design,
+            user
+        };
+    },
     uploadPost: async (_: any, args = defaultPostData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-
         const {message, selectedFile} = args
-        const newPost = new Post({message, selectedFile, user: userId, createdAt: new Date().toISOString()})
-        try {
-            await newPost.save();
-            return {
-                post: newPost,
-                user
-            };
-        } catch (error) {
-            throw new Error(error.message)
-        }
+
+        const post = new Post({message, selectedFile, user: userId, createdAt: new Date().toISOString()})
+        await post.save();
+        return {
+            post,
+            user
+        };
     },
     updatePost: async (_: any, args = defaultPostData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
         const {id, message, selectedFile} = args
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
         const updatedPost = {_id: id, message, selectedFile, user: userId};
         const post = await Post.findByIdAndUpdate(id, updatedPost, {new: true});
 
-        return {post, user}
+        return {
+            post,
+            user
+        }
     },
     deletePost: async (_: any, args = {id: ""}, context: any) => {
         isAuth(context)
@@ -182,14 +174,12 @@ export const Mutation = {
     likePost: async (_: any, args = {id: ""}, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const { id } = args;
-
-        if (!mongoose.Types.ObjectId.isValid(id)){
-            throw new Error(`No post with id: ${id}`);
-        }
-
+        const {id} = args;
         const post = await Post.findById(id);
-        const index = post.likes.findIndex((id: string) => id ===String(userId));
+        if (!post) {
+            throw new Error(`No post with the id: ${id}`)
+        }
+        const index = post.likes.findIndex((id: string) => id === String(userId));
 
         if (index === -1) {
             post.likes.push(userId);
@@ -197,24 +187,27 @@ export const Mutation = {
             post.likes = post.likes.filter((id: string) => id !== String(userId));
         }
 
-        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+        const updatedPost = await Post.findByIdAndUpdate(id, post, {new: true});
 
         return {
             post: updatedPost,
             user
         };
     },
-    commentPost: async (_: any, args= defaultCommentData, context: any) => {
+    commentPost: async (_: any, args = defaultCommentData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId})
 
-        const {postId, comment} = args
-        const post = await Post.findById(postId)
+        const {id, comment} = args
+        const post = await Post.findById(id)
 
-        post.comments.push({"username" : user.username, "text": comment});
+        if (!mongoose.Types.ObjectId.isValid(id) || !post) {
+            throw new Error(`No post with id: ${id}`);
+        }
 
-        const updatePost = await Post.findByIdAndUpdate(postId, post, { new: true });
-        return updatePost
+        post.comments.push({"username": user.username, "text": comment});
+
+        return Post.findByIdAndUpdate(id, post, {new: true});
     }
 }
 
