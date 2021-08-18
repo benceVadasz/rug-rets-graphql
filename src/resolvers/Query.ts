@@ -45,9 +45,8 @@ export const Query = {
             throw new Error(e.message)
         }
     },
-    getPost: async (_: any, args = {id: ""}, context: any) => {
+    getPost: async (_: any, {id}: { id: '' }, context: any) => {
         const userId = isAuth(context)
-        const {id} = args
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
@@ -57,6 +56,10 @@ export const Query = {
         return {
             post, user
         }
+    },
+    getMyPosts: async (_: any, args : null, context: any) => {
+        const userId = isAuth(context)
+        return Post.find({user: userId});
     },
     getPostsByCreator: async (_: any, args = {id: ""}) => {
 
@@ -71,9 +74,8 @@ export const Query = {
         }
 
     },
-    getPostsBySearch: async (_: any, args = {searchQuery: ""}, context: any) => {
+    getPostsBySearch: async (_: any, {searchQuery} : {searchQuery: ""}, context: any) => {
 
-        const {searchQuery} = args
         const message = new RegExp(searchQuery, "i");
 
         return Post.find({$or: [{message}]});

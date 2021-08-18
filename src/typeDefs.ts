@@ -79,6 +79,7 @@ export const typeDefs = gql`
         getPosts: [Post!]!
         getPost(id: ID!): PostPayload
         getPostsByCreator(id: ID!): PostsPayload
+        getMyPosts: [Post!]!
         getPostsBySearch(searchQuery: String!): [Post!]!
     }
 
@@ -95,4 +96,5 @@ export const typeDefs = gql`
         likePost(id: ID!): PostPayload
         commentPost(id: ID!, comment: String!): Post
     }
+    
 `
