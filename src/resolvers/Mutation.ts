@@ -47,8 +47,8 @@ const defaultCommentData = {
 }
 
 export const Mutation = {
-    signUp: async (_: any, args = defaultNewUser) => {
-        const {username, givenName, familyName, email, password, confirmPassword} = args
+    signUp: async (_: any, {username, password, email,
+        confirmPassword, givenName, familyName} = defaultNewUser) => {
 
         const emailRegistered = await User.findOne({email});
         const takenUsername = await User.findOne({username});
@@ -72,8 +72,7 @@ export const Mutation = {
         };
     },
 
-    signIn: async (_: any, args = defaultUser) => {
-        const {email, password} = args
+    signIn: async (_: any, {email, password} = defaultUser) => {
 
         const existingUser = await User.findOne({email});
         if (!existingUser) {
@@ -102,10 +101,9 @@ export const Mutation = {
             token
         }
     },
-    uploadColor: async (_: any, args = colorData, context: any) => {
+    uploadColor: async (_: any, {value, name} = colorData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const {name, value} = args
 
         const color = new Color({name, value, user: userId, createdAt: new Date().toISOString()})
         await color.save();
@@ -115,8 +113,7 @@ export const Mutation = {
             user
         };
     },
-    deleteColor: async (_: any, args = {id: ""}, context: any) => {
-        const {id} = args
+    deleteColor: async (_: any, {id} = {id: ""}, context: any) => {
         isAuth(context)
         await Color.findByIdAndDelete(id)
         return true
@@ -134,10 +131,9 @@ export const Mutation = {
             user
         };
     },
-    uploadPost: async (_: any, args = defaultPostData, context: any) => {
+    uploadPost: async (_: any, {message, selectedFile} = defaultPostData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const {message, selectedFile} = args
 
         const post = new Post({message, selectedFile, user: userId, createdAt: new Date().toISOString()})
         await post.save();
@@ -146,10 +142,9 @@ export const Mutation = {
             user
         };
     },
-    updatePost: async (_: any, args = defaultPostData, context: any) => {
+    updatePost: async (_: any, {id, message, selectedFile} = defaultPostData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const {id, message, selectedFile} = args
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
@@ -162,19 +157,17 @@ export const Mutation = {
             user
         }
     },
-    deletePost: async (_: any, args = {id: ""}, context: any) => {
+    deletePost: async (_: any, {id} = {id: ""}, context: any) => {
         isAuth(context)
-        const {id} = args
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
         await Post.findByIdAndDelete(id)
         return true
     },
-    likePost: async (_: any, args = {id: ""}, context: any) => {
+    likePost: async (_: any, {id} = {id: ""}, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const {id} = args;
         const post = await Post.findById(id);
         if (!post) {
             throw new Error(`No post with the id: ${id}`)
@@ -194,11 +187,10 @@ export const Mutation = {
             user
         };
     },
-    commentPost: async (_: any, args = defaultCommentData, context: any) => {
+    commentPost: async (_: any, {comment, id} = defaultCommentData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId})
 
-        const {id, comment} = args
         const post = await Post.findById(id)
 
         if (!mongoose.Types.ObjectId.isValid(id) || !post) {
