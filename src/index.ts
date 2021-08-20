@@ -24,10 +24,11 @@ const startServer = async () => {
         typeDefs,
         resolvers,
         context: async ({req}) => {
+            console.log(typeof req.headers.authorization)
             return {
                 ...req,
                 userId:
-                    req && req.headers.authorization ? getUserId(req) : null
+                    req && req.headers.authorization !== 'null' ? getUserId(req) : null
             };
         }
     });
@@ -44,7 +45,7 @@ const startServer = async () => {
     mongoose.set('useFindAndModify', false);
 
     app.listen({port: 4000}, () =>
-        console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+        console.log(`🚀 Server ready at http://localhost:4000/graphql`)
     );
 };
 
