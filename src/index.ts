@@ -24,7 +24,6 @@ const startServer = async () => {
         typeDefs,
         resolvers,
         context: async ({req}) => {
-            console.log(typeof req.headers.authorization)
             return {
                 ...req,
                 userId:

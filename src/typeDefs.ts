@@ -53,6 +53,9 @@ export const typeDefs = gql`
         selectedFile: String
         likes: [String!]!
         comments: [Comment!]!
+        createdAt: Date!
+        userId: ID!
+        username: String!
     }
 
     type PostPayload {
@@ -62,7 +65,6 @@ export const typeDefs = gql`
     
     type PostsPayload {
         posts: [Post!]!
-        user: User!
     }
     
     type AuthPayload {
@@ -76,7 +78,7 @@ export const typeDefs = gql`
         getColors: [Color!]!
         colorExists(hex: String!): Boolean
         getDesigns: [Design!]!
-        getPosts: [Post!]!
+        getPosts: PostsPayload!
         getPost(id: ID!): PostPayload
         getPostsByCreator(id: ID!): PostsPayload
         getMyPosts: [Post!]!
@@ -85,7 +87,7 @@ export const typeDefs = gql`
 
     type Mutation {
         signUp(username: String!, givenName: String!, familyName: String!,
-            email: String!, password: String!, confirmPassword: String!): AuthPayload
+            email: String!, password: String!): AuthPayload
         signIn(email: String!, password: String!): AuthPayload
         uploadColor(name: String, value: String!): ColorPayload
         deleteColor(id: ID!): Boolean
@@ -96,5 +98,7 @@ export const typeDefs = gql`
         likePost(id: ID!): PostPayload
         commentPost(id: ID!, comment: String!): Post
     }
+
+    scalar Date
     
 `

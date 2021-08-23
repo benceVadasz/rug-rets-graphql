@@ -15,7 +15,6 @@ const defaultNewUser = {
     familyName: "",
     email: "",
     password: "",
-    confirmPassword: ""
 }
 
 const defaultUser = {
@@ -47,17 +46,16 @@ const defaultCommentData = {
 }
 
 export const Mutation = {
-    signUp: async (_: any, {username, password, email,
-        confirmPassword, givenName, familyName} = defaultNewUser) => {
+    signUp: async (_: any, {
+        username, password, email,
+        givenName, familyName
+    } = defaultNewUser) => {
 
         const emailRegistered = await User.findOne({email});
         const takenUsername = await User.findOne({username});
 
         if (emailRegistered || takenUsername) {
             throw new UserInputError(emailRegistered ? 'Email is already registered' : 'Username is taken');
-        }
-        if (password !== confirmPassword) {
-            throw new UserInputError('Passwords do not match');
         }
         const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -73,7 +71,6 @@ export const Mutation = {
     },
 
     signIn: async (_: any, {email, password} = defaultUser) => {
-
         const existingUser = await User.findOne({email});
         if (!existingUser) {
             throw new UserInputError('User not found', {
@@ -135,7 +132,7 @@ export const Mutation = {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
 
-        const post = new Post({message, selectedFile, user: userId, createdAt: new Date().toISOString()})
+        const post = new Post({message, selectedFile, user: userId, username: user.username, createdAt: new Date().toISOString()})
         await post.save();
         return {
             post,

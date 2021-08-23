@@ -27,7 +27,9 @@ export const Query = {
     },
     getColors: async (_: any, args: null, context: any) => {
         const userId = isAuth(context)
-        return Color.find({user: userId});
+        const colors = await Color.find({user: userId})
+        return colors
+
     },
     colorExists: async (_: any, args = defaultColorValue) => {
         const {value} = args
@@ -40,7 +42,8 @@ export const Query = {
     },
     getPosts: async () => {
         try {
-            return await Post.find().sort({'createdAt': -1});
+            const posts = await Post.find().sort({'createdAt': -1});
+            return {posts}
         } catch (e) {
             throw new Error(e.message)
         }
