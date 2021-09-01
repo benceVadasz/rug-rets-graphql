@@ -7,25 +7,28 @@ export const typeDefs = gql`
         givenName: String!
         familyName: String!
         email: String!
+        phone: String
+        profilePicture: String
         street: String
         zipcode: Int
         city: String
         other: String
     }
 
-#    fragment addressDetails on User {
-#        street
-#        zipcode
-#        city
-#        other
-#    }
+    #    fragment addressDetails on User {
+    #        street
+    #        zipcode
+    #        city
+    #        other
+    #    }
 
     type Color {
         name: String!
         value: String!
         user: String!
+        _id: ID!
     }
-    
+
     type ColorPayload {
         color: Color!
         user: User!
@@ -37,36 +40,38 @@ export const typeDefs = gql`
         shape: String!
         user: String!
     }
-    
+
     type DesignPayload {
         design: Design!
         user: User!
     }
-    
+
     type Comment {
         username: String!
         text: String!
+        createdAt: Date
     }
 
     type Post {
+        _id: ID!
         message: String!
         selectedFile: String
         likes: [String!]!
         comments: [Comment!]!
         createdAt: Date!
-        userId: ID!
-        username: String!
+        userId: User
+        username: String
+        profilePicture: String
     }
 
     type PostPayload {
         post: Post!
-        user: User!
     }
-    
+
     type PostsPayload {
         posts: [Post!]!
     }
-    
+
     type AuthPayload {
         token: String!
         user: User!
@@ -78,8 +83,8 @@ export const typeDefs = gql`
         getColors: [Color!]!
         colorExists(hex: String!): Boolean
         getDesigns: [Design!]!
-        getPosts: PostsPayload!
-        getPost(id: ID!): PostPayload
+        getPosts(searchQuery: String): [Post!]!
+        getPost(id: ID!): Post
         getPostsByCreator(id: ID!): PostsPayload
         getMyPosts: [Post!]!
         getPostsBySearch(searchQuery: String!): [Post!]!
@@ -91,14 +96,15 @@ export const typeDefs = gql`
         signIn(email: String!, password: String!): AuthPayload
         uploadColor(name: String, value: String!): ColorPayload
         deleteColor(id: ID!): Boolean
-        uploadDesign(name: String!, colors: [String!]!): DesignPayload,
+        uploadDesign(name: String!, colors: [String!]!, shape: String!): DesignPayload,
         uploadPost(message: String!, selectedFile: String): PostPayload
         updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
         deletePost(id: ID!): Boolean
         likePost(id: ID!): PostPayload
         commentPost(id: ID!, comment: String!): Post
+        updateProfile(username: String!, givenName: String!,
+            familyName: String!, email: String!, profilePicture: String, phone: String): User
     }
 
     scalar Date
-    
 `

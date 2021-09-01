@@ -27,9 +27,7 @@ export const Query = {
     },
     getColors: async (_: any, args: null, context: any) => {
         const userId = isAuth(context)
-        const colors = await Color.find({user: userId})
-        return colors
-
+        return Color.find({user: userId});
     },
     colorExists: async (_: any, args = defaultColorValue) => {
         const {value} = args
@@ -40,25 +38,20 @@ export const Query = {
         const userId = isAuth(context)
         return Design.find({user: userId});
     },
-    getPosts: async () => {
+    getPosts: async (_: any, {searchQuery}: { searchQuery: '' }) => {
         try {
-            const posts = await Post.find().sort({'createdAt': -1});
-            return {posts}
+            return await Post.find({message: { $regex: searchQuery }}).sort({'createdAt': -1})
+                .populate({path: 'userId', select: ['username', 'profilePicture', '_id']})
         } catch (e) {
             throw new Error(e.message)
         }
     },
-    getPost: async (_: any, {id}: { id: '' }, context: any) => {
-        const userId = isAuth(context)
+    getPost: async (_: any, {id}: { id: '' }) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
-        const user = await User.findOne({"_id": userId});
-        const post = await Post.findById(id);
-
-        return {
-            post, user
-        }
+        return Post.findById(id)
+            .populate({path: 'userId', select: ['username', 'profilePicture', '_id']});
     },
     getMyPosts: async (_: any, args : null, context: any) => {
         const userId = isAuth(context)
