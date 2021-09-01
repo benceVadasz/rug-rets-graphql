@@ -27,7 +27,7 @@ const startServer = async () => {
             return {
                 ...req,
                 userId:
-                    req && req.headers.authorization !== 'null' ? getUserId(req) : null
+                    req && req.headers.authorization && req.headers.authorization !== "undefined" ? getUserId(req) : null
             };
         }
     });
