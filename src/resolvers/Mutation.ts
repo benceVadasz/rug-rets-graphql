@@ -29,9 +29,9 @@ const colorData = {
 }
 
 const defaultDesignData = {
-    userId: "",
     name: "",
-    colors: []
+    colors: [],
+    shape: ""
 }
 
 const defaultPostData = {
@@ -43,6 +43,16 @@ const defaultPostData = {
 const defaultCommentData = {
     id: "",
     comment: ""
+}
+
+const defaultProfileData = {
+    username: "",
+    givenName: "",
+    familyName: "",
+    email: "",
+    password: "",
+    profilePicture: "",
+    phone: ""
 }
 
 export const Mutation = {
@@ -98,6 +108,12 @@ export const Mutation = {
             token
         }
     },
+    updateProfile: async (_: any, {username, givenName, familyName,
+        email, profilePicture, phone} = defaultProfileData, context: any) => {
+        const userId = isAuth(context)
+        const updatedProfile = {username, givenName, familyName, email, profilePicture, phone}
+        return User.findByIdAndUpdate(userId, updatedProfile, {new: true});
+    },
     uploadColor: async (_: any, {value, name} = colorData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
@@ -118,9 +134,9 @@ export const Mutation = {
     uploadDesign: async (_: any, args = defaultDesignData, context: any) => {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
-        const {name, colors} = args
+        const {name, colors, shape} = args
 
-        const design = new Design({name, colors, user: userId, createdAt: new Date().toISOString()})
+        const design = new Design({name, colors, shape, user: userId, createdAt: new Date().toISOString()})
         await design.save();
 
         return {
@@ -132,12 +148,10 @@ export const Mutation = {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
 
-        const post = new Post({message, selectedFile, user: userId, username: user.username, createdAt: new Date().toISOString()})
+        const post = new Post({message, selectedFile, userId, username: user.username,
+            profilePicture: user.profilePicture, createdAt: new Date().toISOString()})
         await post.save();
-        return {
-            post,
-            user
-        };
+        return {post, user};
     },
     updatePost: async (_: any, {id, message, selectedFile} = defaultPostData, context: any) => {
         const userId = isAuth(context)
@@ -146,7 +160,7 @@ export const Mutation = {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
-        const updatedPost = {_id: id, message, selectedFile, user: userId};
+        const updatedPost = {_id: id, message, selectedFile, user: userId, username: user.username};
         const post = await Post.findByIdAndUpdate(id, updatedPost, {new: true});
 
         return {
@@ -194,7 +208,7 @@ export const Mutation = {
             throw new Error(`No post with id: ${id}`);
         }
 
-        post.comments.push({"username": user.username, "text": comment});
+        post.comments.push({"username": user.username, "text": comment, "createdAt": new Date().toISOString()});
 
         return Post.findByIdAndUpdate(id, post, {new: true});
     }
