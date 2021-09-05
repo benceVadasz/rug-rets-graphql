@@ -40,7 +40,8 @@ export const Query = {
     },
     getPosts: async (_: any, {searchQuery}: { searchQuery: '' }) => {
         try {
-            return await Post.find({message: { $regex: searchQuery }}).sort({'createdAt': -1})
+            return await Post.find({message: { $regex: !searchQuery ? '' : searchQuery, "$options": "i" }})
+                .sort({'createdAt': -1})
                 .populate({path: 'userId', select: ['username', 'profilePicture', '_id']})
         } catch (e) {
             throw new Error(e.message)
