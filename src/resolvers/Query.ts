@@ -40,7 +40,7 @@ export const Query = {
     },
     getPosts: async (_: any, {searchQuery}: { searchQuery: '' }) => {
         try {
-            return await Post.find({message: { $regex: !searchQuery ? '' : searchQuery, "$options": "i" }})
+            return await Post.find({message: {$regex: !searchQuery ? '' : searchQuery, "$options": "i"}})
                 .sort({'createdAt': -1})
                 .populate({path: 'userId', select: ['username', 'profilePicture', '_id']})
         } catch (e) {
@@ -54,24 +54,26 @@ export const Query = {
         return Post.findById(id)
             .populate({path: 'userId', select: ['username', 'profilePicture', '_id']});
     },
-    getMyPosts: async (_: any, args : null, context: any) => {
+    getPostsGroupedByUsers: async () => {
+        return Post.find({})
+            .populate({path: 'userId', select: ['username', 'profilePicture', '_id']});
+    },
+    getMyPosts: async (_: any, args: null, context: any) => {
         const userId = isAuth(context)
         return Post.find({user: userId});
     },
     getPostsByCreator: async (_: any, args = {id: ""}) => {
-
         const {id} = args
 
         const user = await User.findOne({"_id": id});
-        const posts = await Post.find({user: id});
+        const posts = await Post.find({userId: id});
 
         return {
             posts,
             user
         }
-
     },
-    getPostsBySearch: async (_: any, {searchQuery} : {searchQuery: ""}, context: any) => {
+    getPostsBySearch: async (_: any, {searchQuery}: { searchQuery: "" }, context: any) => {
 
         const message = new RegExp(searchQuery, "i");
 

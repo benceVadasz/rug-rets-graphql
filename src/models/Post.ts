@@ -4,7 +4,8 @@ const postSchema = new mongoose.Schema({
     message: String,
     selectedFile: String,
     userId: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     username: String,
     likes: { type: [String], default: [] },
