@@ -62,16 +62,11 @@ export const Query = {
         const userId = isAuth(context)
         return Post.find({user: userId});
     },
-    getPostsByCreator: async (_: any, args = {id: ""}) => {
-        const {id} = args
-
-        const user = await User.findOne({"_id": id});
-        const posts = await Post.find({userId: id});
-
-        return {
-            posts,
-            user
-        }
+    getPostsByCreator: async (_: any, args = {username: ""}) => {
+        const {username} = args
+        const user = await User.findOne({username})
+        return Post.find({userId: user._id})
+            .populate({path: 'userId', select: ['username', 'profilePicture', '_id']});
     },
     getPostsBySearch: async (_: any, {searchQuery}: { searchQuery: "" }, context: any) => {
 

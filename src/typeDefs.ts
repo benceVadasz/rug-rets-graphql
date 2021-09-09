@@ -63,14 +63,7 @@ export const typeDefs = gql`
         username: String
         profilePicture: String
     }
-
-    type PostPayload {
-        post: Post!
-    }
-
-    type PostsPayload {
-        posts: [Post!]!
-    }
+    
 
     type AuthPayload {
         token: String!
@@ -85,7 +78,7 @@ export const typeDefs = gql`
         getDesigns: [Design!]!
         getPosts(searchQuery: String): [Post!]!
         getPost(id: ID!): Post
-        getPostsByCreator(id: ID!): PostsPayload
+        getPostsByCreator(username: String!): [Post!]!
         getMyPosts: [Post!]!
         getPostsBySearch(searchQuery: String!): [Post!]!
         getPostsGroupedByUsers: [Post]
@@ -98,10 +91,10 @@ export const typeDefs = gql`
         uploadColor(name: String, value: String!): ColorPayload
         deleteColor(id: ID!): Boolean
         uploadDesign(name: String!, colors: [String!]!, shape: String!): DesignPayload,
-        uploadPost(message: String!, selectedFile: String): PostPayload
-        updatePost(id: ID!, message: String!, selectedFile: String): PostPayload
+        uploadPost(message: String!, selectedFile: String): Post!
+        updatePost(id: ID!, message: String!, selectedFile: String): Post!
         deletePost(id: ID!): Boolean
-        likePost(id: ID!): PostPayload
+        likePost(id: ID!): Post!
         commentPost(id: ID!, comment: String!): Post
         updateProfile(username: String!, givenName: String!,
             familyName: String!, email: String!, profilePicture: String, phone: String): User

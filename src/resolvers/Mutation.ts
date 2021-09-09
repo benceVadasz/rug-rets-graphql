@@ -161,12 +161,7 @@ export const Mutation = {
             throw new Error(`No post with id: ${id}`);
         }
         const updatedPost = {_id: id, message, selectedFile, user: userId, username: user.username};
-        const post = await Post.findByIdAndUpdate(id, updatedPost, {new: true});
-
-        return {
-            post,
-            user
-        }
+        return Post.findByIdAndUpdate(id, updatedPost, {new: true});
     },
     deletePost: async (_: any, {id} = {id: ""}, context: any) => {
         isAuth(context)
