@@ -41,23 +41,12 @@ export const Query = {
     },
     getPosts: async (_: any, {searchQuery}: { searchQuery: '' }) => {
         try {
-            if (searchQuery === '' || !searchQuery) {
-                return await Post.find({})
-                    .sort({'createdAt': -1})
-                    .populate({path: 'userId', select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']})
-            }
             return await Post.find({message: {$regex: !searchQuery ? '' : searchQuery, "$options": "i"}})
                 .sort({'createdAt': -1})
-                .populate({path: 'userId', select: ['username', 'profilePicture', '_id',  'givenName', 'familyName', 'email']})
-        } catch (e) {
-            throw new Error(e.message)
-        }
-    },
-    getAllPosts: async () => {
-        try {
-            return await Post.find({})
-                .sort({'createdAt': -1})
-                .populate({path: 'userId', select: ['username', 'profilePicture', '_id',  'givenName', 'familyName', 'email']})
+                .populate({
+                    path: 'userId',
+                    select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']
+                })
         } catch (e) {
             throw new Error(e.message)
         }
@@ -67,11 +56,17 @@ export const Query = {
             throw new Error(`No post with id: ${id}`);
         }
         return Post.findById(id)
-            .populate({path: 'userId', select: ['username', 'profilePicture', '_id',  'givenName', 'familyName', 'email']});
+            .populate({
+                path: 'userId',
+                select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']
+            });
     },
     getPostsGroupedByUsers: async () => {
         return Post.find({})
-            .populate({path: 'userId', select: ['username', 'profilePicture', '_id',  'givenName', 'familyName', 'email']});
+            .populate({
+                path: 'userId',
+                select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']
+            });
     },
     getMyPosts: async (_: any, args: null, context: any) => {
         const userId = isAuth(context)
@@ -81,7 +76,10 @@ export const Query = {
         const {username} = args
         const user = await User.findOne({username})
         return Post.find({userId: user._id})
-            .populate({path: 'userId', select: ['username', 'profilePicture', '_id',  'givenName', 'familyName', 'email']});
+            .populate({
+                path: 'userId',
+                select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']
+            });
     },
     getPostsBySearch: async (_: any, {searchQuery}: { searchQuery: "" }, context: any) => {
 
@@ -99,7 +97,10 @@ export const Query = {
             ]
         }).sort({'createdAt': -1})
             .populate({path: 'to', select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']})
-            .populate({path: 'from', select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']});
+            .populate({
+                path: 'from',
+                select: ['username', 'profilePicture', '_id', 'givenName', 'familyName', 'email']
+            });
 
     }
 }
