@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     id: {
         type: String,
     },
-    profilePicture: String
+    profilePicture: String,
 })
 
 export default mongoose.model('User', userSchema)

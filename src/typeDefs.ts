@@ -70,6 +70,18 @@ export const typeDefs = gql`
         user: User!
     }
 
+    type Message {
+        uuid: String!
+        text: String!
+        from: User
+        to: User
+        createdAt: Date
+    }
+    
+    type Subscription {
+        newMessage: Message
+    }
+
     type Query {
         me: User!
         getAllUsers: [User!]!
@@ -77,11 +89,13 @@ export const typeDefs = gql`
         colorExists(hex: String!): Boolean
         getDesigns: [Design!]!
         getPosts(searchQuery: String): [Post!]!
+        getAllPosts: [Post!]!
         getPost(id: ID!): Post
         getPostsByCreator(username: String!): [Post!]!
         getMyPosts: [Post!]!
         getPostsBySearch(searchQuery: String!): [Post!]!
         getPostsGroupedByUsers: [Post]
+        getMessages(mate: ID!): [Message]!
     }
 
     type Mutation {
@@ -98,7 +112,9 @@ export const typeDefs = gql`
         commentPost(id: ID!, comment: String!): Post
         updateProfile(username: String!, givenName: String!,
             familyName: String!, email: String!, profilePicture: String, phone: String): User
+        sendMessage(to: ID!, text: String!): Message!
     }
 
+    
     scalar Date
 `

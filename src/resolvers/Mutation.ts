@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import Color from "../models/Color";
 import Design from "../models/Design";
 import Post from "../models/Post";
+import Message from "../models/Message";
 import {ACCESS_TOKEN_SECRET} from "../constants";
 import mongoose from 'mongoose';
 import {isAuth} from "../utils";
@@ -43,6 +44,11 @@ const defaultPostData = {
 const defaultCommentData = {
     id: "",
     comment: ""
+}
+
+const defaultMessageData = {
+    to: "",
+    text: ""
 }
 
 const defaultProfileData = {
@@ -108,8 +114,10 @@ export const Mutation = {
             token
         }
     },
-    updateProfile: async (_: any, {username, givenName, familyName,
-        email, profilePicture, phone} = defaultProfileData, context: any) => {
+    updateProfile: async (_: any, {
+        username, givenName, familyName,
+        email, profilePicture, phone
+    } = defaultProfileData, context: any) => {
         const userId = isAuth(context)
         const updatedProfile = {username, givenName, familyName, email, profilePicture, phone}
         return User.findByIdAndUpdate(userId, updatedProfile, {new: true});
@@ -148,10 +156,12 @@ export const Mutation = {
         const userId = isAuth(context)
         const user = await User.findOne({"_id": userId});
 
-        const post = new Post({message, selectedFile, userId, username: user.username,
-            profilePicture: user.profilePicture, createdAt: new Date().toISOString()})
+        const post = new Post({
+            message, selectedFile, userId, username: user.username,
+            profilePicture: user.profilePicture, createdAt: new Date().toISOString()
+        })
         await post.save();
-        return {post, user};
+        return post;
     },
     updatePost: async (_: any, {id, message, selectedFile} = defaultPostData, context: any) => {
         const userId = isAuth(context)
@@ -160,7 +170,8 @@ export const Mutation = {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error(`No post with id: ${id}`);
         }
-        const updatedPost = {_id: id, message, selectedFile, user: userId, username: user.username};
+        const updatedPost = selectedFile ? {_id: id, message, selectedFile, user: userId, username: user.username}:
+            {_id: id, message, user: userId, username: user.username};
         return Post.findByIdAndUpdate(id, updatedPost, {new: true});
     },
     deletePost: async (_: any, {id} = {id: ""}, context: any) => {
@@ -173,7 +184,6 @@ export const Mutation = {
     },
     likePost: async (_: any, {id} = {id: ""}, context: any) => {
         const userId = isAuth(context)
-        const user = await User.findOne({"_id": userId});
         const post = await Post.findById(id);
         if (!post) {
             throw new Error(`No post with the id: ${id}`)
@@ -185,13 +195,7 @@ export const Mutation = {
         } else {
             post.likes = post.likes.filter((id: string) => id !== String(userId));
         }
-
-        const updatedPost = await Post.findByIdAndUpdate(id, post, {new: true});
-
-        return {
-            post: updatedPost,
-            user
-        };
+        return Post.findByIdAndUpdate(id, post, {new: true});
     },
     commentPost: async (_: any, {comment, id} = defaultCommentData, context: any) => {
         const userId = isAuth(context)
@@ -206,6 +210,19 @@ export const Mutation = {
         post.comments.push({"username": user.username, "text": comment, "createdAt": new Date().toISOString()});
 
         return Post.findByIdAndUpdate(id, post, {new: true});
+    },
+    sendMessage: async (_: any, {text, to} = defaultMessageData, context: any) => {
+        const userId = isAuth(context)
+        const user = await User.findOne({"_id": userId})
+        const receiver = await User.findOne({"_id": to})
+        const message = new Message({
+            text, from: user, to: receiver,
+            createdAt: new Date().toISOString()
+        })
+        await context.pubsub.publish("NEW_MESSAGE", message)
+
+        await message.save()
+        return message
     }
 }
 
